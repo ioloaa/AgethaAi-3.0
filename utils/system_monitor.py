@@ -29,7 +29,7 @@ class TermuxCollector:
         stats = {
             "platform": "Android/Termux",
             "python_version": platform.python_version(),
-            "timestamp": datetime.now().isoformat(),
+            "last_update": datetime.now().isoformat(),  # ← ИСПРАВЛЕНО: было "timestamp"
         }
 
         # Батарея
