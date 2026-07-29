@@ -44,7 +44,7 @@ async def post_init(application: Application):
     provider = settings.AI_PROVIDER
     groq_ok = bool(settings.get_groq_keys())
     gemini_ok = bool(settings.get_gemini_key())
-    cerebras_ok = bool(settings.get_cerebras_key())
+    cerebras_ok = bool(settings.get_cerebras_keys())  # ← ИСПРАВЛЕНО: было get_cerebras_key()
 
     if provider == "groq" and not groq_ok:
         logger.error("❌ GROQ_API_KEY не установлен!")
