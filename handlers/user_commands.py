@@ -90,7 +90,7 @@ async def cmd_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
     history_len = len(chat_history.get(update.effective_chat.id))
     groq_status = "✅" if settings.get_groq_keys() else "❌"
     gemini_status = "✅" if settings.get_gemini_key() else "❌"
-    cerebras_status = "✅" if settings.get_cerebras_key() else "❌"
+    cerebras_status = "✅" if settings.get_cerebras_keys() else "❌"
     topic_info = f"ID={settings.ALLOWED_TOPIC_ID}" if settings.ALLOWED_TOPIC_ID is not None else "не ограничен"
     status = f"""Статус:
 
