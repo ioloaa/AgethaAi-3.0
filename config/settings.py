@@ -1,15 +1,18 @@
 """
 Конфигурация бота AgethaAi
-Загружает переменные из .env и config.txt
+Работает с секретами платформы (Railway, Heroku) или с .env
 """
 import os
 from pathlib import Path
 from typing import Set, Optional, List
 
+# Если есть .env — загрузим (для локальной разработки)
+# Если нет — ничего страшного, берём из os.environ (секреты платформы)
 try:
     from dotenv import load_dotenv
     env_path = Path(__file__).resolve().parent.parent / ".env"
-    load_dotenv(dotenv_path=env_path)
+    if env_path.exists():
+        load_dotenv(dotenv_path=env_path)
 except ImportError:
     pass
 
@@ -47,6 +50,7 @@ class Settings:
                 if x.strip().isdigit()
             }
 
+        # Если есть config.txt рядом — подхватим (опционально)
         config_path = Path(__file__).resolve().parent.parent / "config.txt"
         if config_path.exists():
             with open(config_path, "r", encoding="utf-8") as f:
@@ -89,5 +93,4 @@ class Settings:
         return key if key else None
 
 
-# Инициализируем при импорте
 settings = Settings.load()
