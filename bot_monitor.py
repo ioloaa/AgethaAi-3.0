@@ -1,25 +1,31 @@
 """
 Мониторинг системы (телефон/сервер).
-Запускается отдельно или как поток. Пишет данные в utils.system_monitor
+Запускается отдельно или как поток.
 """
 import time
 import platform
 import logging
 from datetime import datetime
 
-try:
-    import psutil
-    PSUTIL_AVAILABLE = True
-except ImportError:
-    PSUTIL_AVAILABLE = False
-
-from utils.system_monitor import SystemMonitor
+from utils.system_monitor import SystemMonitor, TermuxCollector
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("Monitor")
 
+PSUTIL_AVAILABLE = False
+try:
+    import psutil
+    PSUTIL_AVAILABLE = True
+except ImportError:
+    pass
+
 
 def collect_stats():
+    # Если Termux — используем его API
+    if TermuxCollector.is_available():
+        return TermuxCollector.collect()
+
+    # Иначе psutil (Linux/Windows/macOS)
     stats = {
         "platform": platform.system(),
         "python_version": platform.python_version(),
