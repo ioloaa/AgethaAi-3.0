@@ -185,21 +185,21 @@ async def cmd_banlist(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def cmd_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Команда /phone - показать состояние системы"""
+    """Команда /phone - показать состояние телефона/системы"""
     if not await admin_only(update):
         return
+
     await context.bot.send_chat_action(update.effective_chat.id, "typing")
-    state = SystemMonitor.get_state()
+
+    # Собираем данные ПРЯМО СЕЙЧАС
+    state = SystemMonitor.collect_now()
+
     if not state:
-        await update.message.reply_text("⚠️ Нет данных о состоянии системы...\nПроверь, запущен ли монитор-бот (bot_monitor.py)")
+        await update.message.reply_text("⚠️ Не удалось собрать данные о системе.")
         return
-    last_update = datetime.fromisoformat(state['last_update'])
-    now = datetime.now()
-    diff = (now - last_update).total_seconds()
-    if diff > 120:
-        await update.message.reply_text(f"⚠️ Данные устарели ({int(diff)} секунд назад).\nМонитор-бот может не работать. Проверь bot_monitor.py")
-        return
-    message = SystemMonitor.get_formatted_state()
+
+    message = SystemMonitor.get_formatted_state(state)
+
     if len(message) > 4000:
         parts = [message[i:i+4000] for i in range(0, len(message), 4000)]
         for part in parts:
