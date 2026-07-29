@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Set, Optional, List
 
 # Если есть .env — загрузим (для локальной разработки)
-# Если нет — ничего страшного, берём из os.environ (секреты платформы)
 try:
     from dotenv import load_dotenv
     env_path = Path(__file__).resolve().parent.parent / ".env"
@@ -19,7 +18,7 @@ except ImportError:
 
 class Settings:
     """Централизованная конфигурация"""
-    
+
     TELEGRAM_BOT_TOKEN: str = os.getenv("TELEGRAM_BOT_TOKEN", "")
     BOT_NAME: str = os.getenv("BOT_NAME", "Агета")
     AI_PROVIDER: str = os.getenv("AI_PROVIDER", "groq").lower()
@@ -88,9 +87,14 @@ class Settings:
         return key if key else None
 
     @classmethod
-    def get_cerebras_key(cls) -> Optional[str]:
-        key = os.getenv("CEREBRAS_API_KEY", "").strip()
-        return key if key else None
+    def get_cerebras_keys(cls) -> List[str]:
+        keys = []
+        for i in range(1, 6):
+            key_name = f"CEREBRAS_API_KEY_{i}" if i > 1 else "CEREBRAS_API_KEY"
+            key = os.getenv(key_name, "").strip()
+            if key:
+                keys.append(key)
+        return keys
 
 
 settings = Settings.load()
