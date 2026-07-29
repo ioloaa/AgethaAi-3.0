@@ -91,7 +91,7 @@ async def cmd_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Забаненных в чатах: {ban_manager.total_chat_bans}
 Groq API: {"✅" if settings.get_groq_keys() else "❌"}
 Gemini API: {"✅" if settings.get_gemini_key() else "❌"}
-Cerebras API: {"✅" if settings.get_cerebras_key() else "❌"}
+Cerebras API: {"✅" if settings.get_cerebras_keys() else "❌"}
 Разрешённый топик: {topic_info}
 Аптайм: работает
 
