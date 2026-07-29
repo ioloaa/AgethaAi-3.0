@@ -203,6 +203,6 @@ async def cmd_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if len(message) > 4000:
         parts = [message[i:i+4000] for i in range(0, len(message), 4000)]
         for part in parts:
-            await update.message.reply_text(part, parse_mode="Markdown")
+            await update.message.reply_text(part)  # ← УБРАН parse_mode="Markdown"
     else:
-        await update.message.reply_text(message, parse_mode="Markdown")
+        await update.message.reply_text(message)   # ← УБРАН parse_mode="Markdown"
