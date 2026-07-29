@@ -29,7 +29,7 @@ class TermuxCollector:
         stats = {
             "platform": "Android/Termux",
             "python_version": platform.python_version(),
-            "last_update": datetime.now().isoformat(),  # ← ИСПРАВЛЕНО: было "timestamp"
+            "last_update": datetime.now().isoformat(),
         }
 
         # Батарея
@@ -167,54 +167,79 @@ class SystemMonitor:
         cls._state["last_update"] = cls._last_update
 
     @classmethod
+    def collect_now(cls) -> Dict:
+        """Собирает данные прямо сейчас (для /phone)"""
+        if TermuxCollector.is_available():
+            return TermuxCollector.collect()
+        # Fallback на базовую инфу
+        return {
+            "platform": platform.system(),
+            "python_version": platform.python_version(),
+            "last_update": datetime.now().isoformat(),
+            "note": "Монитор не запущен. Запусти bot_monitor.py для полной статистики."
+        }
+
+    @classmethod
     def get_state(cls) -> Optional[Dict]:
         if not cls._state:
-            # Пробуем Termux
-            if TermuxCollector.is_available():
-                return TermuxCollector.collect()
-            # Fallback на базовую инфу
-            try:
-                return {
-                    "platform": platform.system(),
-                    "python_version": platform.python_version(),
-                    "last_update": datetime.now().isoformat(),
-                    "note": "Монитор не запущен. Запусти bot_monitor.py для полной статистики."
-                }
-            except Exception:
-                return None
+            return cls.collect_now()
         return dict(cls._state)
 
     @classmethod
-    def get_formatted_state(cls) -> str:
-        state = cls.get_state()
+    def get_formatted_state(cls, state: Dict = None) -> str:
+        if state is None:
+            state = cls.get_state()
         if not state:
             return "⚠️ Нет данных о состоянии системы."
+
         lines = ["📱 *Состояние системы*", ""]
-        for key, value in state.items():
-            if key == "last_update":
-                lines.append(f"🕐 *Последнее обновление:* `{value}`")
-            elif key == "battery_percent":
-                lines.append(f"🔋 *Батарея:* `{value}%`")
-            elif key == "battery_status":
-                lines.append(f"⚡ *Статус:* `{value}`")
-            elif key == "battery_temperature":
-                lines.append(f"🌡 *Температура:* `{value}°C`")
-            elif key == "cpu_load_1m":
-                lines.append(f"🖥 *CPU Load:* `{value}`")
-            elif key == "ram_percent":
-                lines.append(f"💾 *RAM:* `{state.get('ram_used_mb', '?')} / {state.get('ram_total_mb', '?')} MB ({value}%)`")
-            elif key == "disk_percent":
-                lines.append(f"💿 *Диск:* `{state.get('disk_used', '?')} / {state.get('disk_total', '?')} ({value})`")
-            elif key == "uptime":
-                lines.append(f"⏱ *Аптайм:* `{value}`")
-            elif key == "device":
-                lines.append(f"📲 *Устройство:* `{value}`")
-            elif key == "android_version":
-                lines.append(f"🤖 *Android:* `{value}`")
-            elif key == "network_type":
-                lines.append(f"📶 *Сеть:* `{value}`")
-            elif isinstance(value, (int, float)):
-                lines.append(f"• {key}: `{value:.2f}`" if isinstance(value, float) else f"• {key}: `{value}`")
-            else:
-                lines.append(f"• {key}: `{value}`")
+
+        # Батарея
+        if "battery_percent" in state:
+            bp = state["battery_percent"]
+            bs = state.get("battery_status", "N/A")
+            bt = state.get("battery_temperature")
+            if bp is not None:
+                lines.append(f"🔋 *Батарея:* `{bp}%` ({bs})")
+            if bt is not None:
+                lines.append(f"🌡 *Температура:* `{bt}°C`")
+
+        # CPU
+        if "cpu_load_1m" in state:
+            lines.append(f"🖥 *CPU Load:* `{state['cpu_load_1m']}`")
+
+        # RAM
+        if "ram_percent" in state:
+            ru = state.get("ram_used_mb", "?")
+            rt = state.get("ram_total_mb", "?")
+            rp = state["ram_percent"]
+            lines.append(f"💾 *RAM:* `{ru} / {rt} MB` ({rp}%)")
+
+        # Диск
+        if "disk_percent" in state:
+            du = state.get("disk_used", "?")
+            dt = state.get("disk_total", "?")
+            dp = state["disk_percent"]
+            lines.append(f"💿 *Диск:* `{du} / {dt}` ({dp})")
+
+        # Устройство
+        if "device" in state:
+            lines.append(f"📲 *Устройство:* `{state['device']}`")
+        if "android_version" in state:
+            lines.append(f"🤖 *Android:* `{state['android_version']}`")
+        if "network_type" in state:
+            lines.append(f"📶 *Сеть:* `{state['network_type']}`")
+
+        # Система
+        if "uptime" in state:
+            lines.append(f"⏱ *Аптайм:* `{state['uptime']}`")
+        if "kernel" in state:
+            lines.append(f"⚙️ *Ядро:* `{state['kernel']}`")
+
+        # Прочее
+        if "note" in state:
+            lines.append(f"\n_{state['note']}_")
+
+        lines.append(f"\n🕐 *Обновлено:* `{state.get('last_update', 'N/A')}`")
+
         return "\n".join(lines)
