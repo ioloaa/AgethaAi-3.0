@@ -81,7 +81,7 @@ class AIEngine:
                 return response
             logger.warning("Gemini API недоступен")
 
-        if provider == "cerebras" or settings.get_cerebras_key():
+        if provider == "cerebras" or settings.get_cerebras_keys():
             response = self._query_cerebras(messages)
             if response:
                 return response
@@ -162,34 +162,38 @@ class AIEngine:
         return None
 
     def _query_cerebras(self, messages: List[Dict]) -> Optional[dict]:
-        api_key = settings.get_cerebras_key()
-        if not api_key:
+        api_keys = settings.get_cerebras_keys()
+        if not api_keys:
             return None
 
         model = settings.CEREBRAS_MODEL
-        headers = {
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json"
-        }
-        data = {
-            "model": model,
-            "messages": messages,
-            "temperature": 0.8,
-            "max_tokens": 1024,
-            "stream": False
-        }
-        try:
-            resp = requests.post(
-                "https://api.cerebras.ai/v1/chat/completions",
-                headers=headers, json=data, timeout=30
-            )
-            if resp.status_code == 200:
-                content = resp.json()["choices"][0]["message"]["content"]
-                return self._parse_response(content)
-            else:
-                logger.error(f"Cerebras ошибка {resp.status_code}: {resp.text[:200]}")
-        except Exception as e:
-            logger.error(f"Cerebras исключение: {e}")
+        for api_key in api_keys:
+            headers = {
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json"
+            }
+            data = {
+                "model": model,
+                "messages": messages,
+                "temperature": 0.8,
+                "max_tokens": 1024,
+                "stream": False
+            }
+            try:
+                resp = requests.post(
+                    "https://api.cerebras.ai/v1/chat/completions",
+                    headers=headers, json=data, timeout=30
+                )
+                if resp.status_code == 200:
+                    content = resp.json()["choices"][0]["message"]["content"]
+                    return self._parse_response(content)
+                elif resp.status_code in (429, 401):
+                    continue
+                else:
+                    logger.error(f"Cerebras ошибка {resp.status_code}: {resp.text[:200]}")
+            except Exception as e:
+                logger.error(f"Cerebras исключение: {e}")
+                continue
         return None
 
     def _parse_response(self, text: str) -> dict:
