@@ -1,9 +1,6 @@
 python-telegram-bot>=20.0
-psutil>=5.9.0
+python-dotenv>=1.0.0
 requests>=2.31.0
 groq>=0.4.0
 google-generativeai>=0.3.0
-cerebras-cloud-sdk>=1.0.0
 mistralai>=1.0.0
-deepseek>=1.0.0
-python-dotenv>=1.0.0
