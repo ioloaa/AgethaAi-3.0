@@ -1,4 +1,3 @@
-cat > telegram_bot.py << 'EOF'
 """
 AgethaAi Telegram Bot v8 — FPE Edition
 Точка входа с поддержкой монитора состояния телефона
@@ -282,4 +281,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-EOF
