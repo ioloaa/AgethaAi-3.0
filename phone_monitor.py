@@ -1,4 +1,3 @@
-cat > phone_monitor.py << 'EOF'
 #!/usr/bin/env python3
 """
 phone_monitor.py - Мониторинг состояния телефона для Termux
@@ -343,4 +342,3 @@ if __name__ == "__main__":
     print(PhoneState.get_formatted_status())
     print("=" * 50)
     print("✅ Тест завершен")
-EOF
