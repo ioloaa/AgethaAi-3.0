@@ -1,4 +1,3 @@
-cat > bot_monitor.py << 'EOF'
 """
 bot_monitor.py - Мониторинг системы (обертка для phone_monitor.py)
 Запускается как отдельный процесс для совместимости
@@ -38,4 +37,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-EOF
